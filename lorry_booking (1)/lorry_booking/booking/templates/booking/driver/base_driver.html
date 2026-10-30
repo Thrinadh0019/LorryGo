@@ -1,0 +1,46 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Driver Panel - LorryGo{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'booking/css/style.css' %}">
+    <style>
+        body.driver-body { flex-direction: row; }
+        .driver-sidebar {
+            width: 220px; background: #14532d; color: #fff; min-height: 100vh;
+            padding: 24px 0; flex-shrink: 0;
+        }
+        .driver-sidebar .brand { padding: 0 24px 24px; font-weight: 700; font-size: 1.15rem; display: block; color: #fff; text-decoration: none; }
+        .driver-sidebar a { display: block; padding: 12px 24px; color: #bbf7d0; text-decoration: none; font-size: 0.92rem; }
+        .driver-sidebar a:hover, .driver-sidebar a.active { background: #166534; color: #fff; }
+        .driver-sidebar .logout-link { margin-top: 24px; border-top: 1px solid #166534; padding-top: 16px; color: #fca5a5; }
+        .driver-main { flex: 1; padding: 32px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+        .stat-card .num { font-size: 1.8rem; font-weight: 700; color: var(--navy); }
+        .stat-card .label { font-size: 0.82rem; color: var(--slate); margin-top: 2px; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="driver-body">
+    <aside class="driver-sidebar">
+        <a class="brand" href="{% url 'booking:driver_dashboard' %}">🚚 LorryGo Driver</a>
+        <a href="{% url 'booking:driver_dashboard' %}" class="{% if request.resolver_match.url_name == 'driver_dashboard' %}active{% endif %}">Dashboard</a>
+        <a href="{% url 'booking:driver_trips' %}" class="{% if request.resolver_match.url_name == 'driver_trips' %}active{% endif %}">My Trips</a>
+        <a href="{% url 'booking:driver_logout' %}" class="logout-link">Logout</a>
+    </aside>
+    <main class="driver-main">
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

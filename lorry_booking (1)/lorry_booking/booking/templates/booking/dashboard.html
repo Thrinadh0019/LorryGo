@@ -1,0 +1,57 @@
+{% extends "booking/base.html" %}
+{% block title %}Dashboard - LorryGo{% endblock %}
+{% block content %}
+
+{% if active_trip %}
+<div class="card" style="border-left:4px solid var(--primary);">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <div>
+            <div style="font-size:0.8rem;color:var(--slate);text-transform:uppercase;letter-spacing:.04em;">Active trip</div>
+            <div style="font-weight:700;font-size:1.1rem;">{{ active_trip.source }} &rarr; {{ active_trip.destination }}</div>
+            <div style="color:var(--slate);font-size:0.9rem;">{{ active_trip.status_label }}</div>
+        </div>
+        <a href="{% url 'booking:trip_status' active_trip.id %}" class="btn-link" style="text-decoration:none;">Track Trip &rarr;</a>
+    </div>
+</div>
+{% endif %}
+
+<div class="hero">
+    <h1>Hi {{ request.session.username }}, where's your lorry headed today?</h1>
+    <p>Enter your pickup and drop-off on the map — we'll match you with the nearest available driver.</p>
+    <a href="{% url 'booking:book_lorry' %}" class="btn-primary">+ Book a Lorry</a>
+</div>
+
+<div class="card">
+    <h2 style="margin-top:0;">Recent Bookings</h2>
+    {% if recent_bookings %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Route</th>
+                    <th>Lorry Type</th>
+                    <th>Fare</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in recent_bookings %}
+                <tr>
+                    <td>{{ b.source }} &rarr; {{ b.destination }}</td>
+                    <td>{{ b.lorry_type_name }}</td>
+                    <td>₹{{ b.fare }}</td>
+                    <td><span class="badge {{ b.status }}">{{ b.status_label }}</span></td>
+                    <td><a href="{% url 'booking:trip_status' b.id %}">View</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p style="margin-top:16px;"><a href="{% url 'booking:my_bookings' %}">View all bookings &rarr;</a></p>
+    {% else %}
+        <div class="empty-state">
+            <p>You haven't booked a lorry yet.</p>
+            <a href="{% url 'booking:book_lorry' %}" class="auth-switch">Book your first lorry</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

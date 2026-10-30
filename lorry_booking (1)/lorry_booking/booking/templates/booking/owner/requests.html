@@ -1,0 +1,61 @@
+{% extends "booking/owner/base_owner.html" %}
+{% block title %}Ride Requests - LorryGo{% endblock %}
+{% block content %}
+<h1 style="margin-top:0;">Ride Requests</h1>
+<p style="color:var(--slate);margin-top:-8px;">
+    New bookings land here for every owner to see. Accept one and pick which
+    of your drivers to send — first to accept gets it.
+</p>
+
+{% if not available_drivers %}
+<div class="card" style="background:#fef3c7;border-color:#fde68a;">
+    <p style="margin:0;color:#92400e;">
+        You don't have any <strong>available</strong> drivers right now, so you
+        can't accept a ride yet. Add one on the
+        <a href="{% url 'booking:owner_drivers' %}">My Drivers</a> page, or
+        mark an existing driver available if they're currently offline.
+    </p>
+</div>
+{% endif %}
+
+<div class="card">
+    {% if requests %}
+    <table>
+        <thead><tr><th>Route</th><th>Lorry Type</th><th>Distance</th><th>Fare</th><th>Requested</th><th>Assign Driver</th></tr></thead>
+        <tbody>
+            {% for r in requests %}
+            <tr>
+                <td>{{ r.source }} &rarr; {{ r.destination }}</td>
+                <td>{{ r.lorry_type_name }}</td>
+                <td>{{ r.distance_km }} km</td>
+                <td>
+                    ₹{{ r.fare }}
+                    {% if r.is_return_discount %}
+                    <br><span style="color:#15803d;font-size:0.72rem;font-weight:700;background:#dcfce7;padding:1px 6px;border-radius:4px;white-space:nowrap;">🎉 Return-trip 50% off</span>
+                    {% endif %}
+                </td>
+                <td style="white-space:nowrap;color:var(--slate);font-size:0.85rem;">{{ r.created_at|timesince }} ago</td>
+                <td>
+                    {% if available_drivers %}
+                    <form method="post" action="{% url 'booking:owner_accept_ride' r.id %}" style="display:flex;gap:8px;white-space:nowrap;">
+                        {% csrf_token %}
+                        <select name="driver_id" required>
+                            {% for d in available_drivers %}
+                                <option value="{{ d.id }}">{{ d.name }} &middot; {{ d.vehicle_number }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn-primary" style="width:auto;padding:6px 16px;">Accept</button>
+                    </form>
+                    {% else %}
+                    <span style="color:var(--slate);font-size:0.85rem;">No drivers available</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">No pending ride requests right now.</div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "booking/admin/base_admin.html" %}
+{% block title %}Manage Drivers - LorryGo Admin{% endblock %}
+{% block content %}
+<h1 style="margin-top:0;">Drivers</h1>
+
+<div class="card">
+    <h2 style="margin-top:0;">Add a Driver</h2>
+    <form method="post" action="{% url 'booking:admin_add_driver' %}">
+        {% csrf_token %}
+        <div class="form-row">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone</label>
+                <input type="tel" id="phone" name="phone" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="vehicle_number">Vehicle Number</label>
+                <input type="text" id="vehicle_number" name="vehicle_number" placeholder="e.g. MH-31-AB-1234" required>
+            </div>
+        </div>
+        <button type="submit" class="btn-primary" style="width:auto;padding:10px 22px;">Add Driver</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2 style="margin-top:0;">All Drivers</h2>
+    {% if drivers %}
+    <table>
+        <thead>
+            <tr><th>Name</th><th>Phone</th><th>Vehicle</th><th>Owner</th><th>Rating</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for d in drivers %}
+            <tr>
+                <td>{{ d.name }}</td>
+                <td>{{ d.phone }}</td>
+                <td>{{ d.vehicle_number }}</td>
+                <td>{% if d.owner_username %}{{ d.owner_username }}{% else %}<span style="color:var(--slate);">LorryGo Fleet</span>{% endif %}</td>
+                <td>⭐ {{ d.rating }}</td>
+                <td><span class="badge {{ d.status }}">{{ d.status }}</span></td>
+                <td style="white-space:nowrap;">
+                    <form method="post" action="{% url 'booking:admin_toggle_driver' d.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-link" style="text-decoration:none;border:none;cursor:pointer;">Toggle</button>
+                    </form>
+                    &middot;
+                    <form method="post" action="{% url 'booking:admin_delete_driver' d.id %}" style="display:inline;" onsubmit="return confirm('Remove this driver?');">
+                        {% csrf_token %}
+                        <button type="submit" class="cancel-btn" style="background:none;border:none;cursor:pointer;">Remove</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">No drivers yet. Add one above, or run <code>python manage.py seed_drivers</code>.</div>
+    {% endif %}
+</div>
+{% endblock %}

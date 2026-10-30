@@ -1,0 +1,29 @@
+{% extends "booking/base.html" %}
+{% block title %}Register - LorryGo{% endblock %}
+{% block content %}
+<div class="auth-card">
+    <h1>Create an account</h1>
+    <p class="subtitle">Sign up to start booking lorries</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required autofocus>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required minlength="6">
+        </div>
+        <div class="form-group">
+            <label for="confirm_password">Confirm Password</label>
+            <input type="password" id="confirm_password" name="confirm_password" required minlength="6">
+        </div>
+        <button type="submit" class="btn-primary">Register</button>
+    </form>
+    <p class="auth-switch">Already have an account? <a href="{% url 'booking:login' %}">Login here</a></p>
+</div>
+{% endblock %}

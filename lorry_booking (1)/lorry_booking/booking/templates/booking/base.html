@@ -1,0 +1,46 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LorryGo{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'booking/css/style.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <a class="brand" href="{% if request.session.username %}{% url 'booking:dashboard' %}{% else %}{% url 'booking:login' %}{% endif %}">🚛 LorryGo</a>
+        <div class="nav-links">
+            {% if request.session.username %}
+                <a href="{% url 'booking:dashboard' %}">Dashboard</a>
+                <a href="{% url 'booking:book_lorry' %}">Book Lorry</a>
+                <a href="{% url 'booking:my_bookings' %}">My Bookings</a>
+                <span class="nav-user">Hi, {{ request.session.username }}</span>
+                <a href="{% url 'booking:logout' %}" class="btn-link">Logout</a>
+            {% else %}
+                <a href="{% url 'booking:login' %}">Login</a>
+                <a href="{% url 'booking:register' %}">Register</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main class="container">
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>LorryGo &mdash; Book a lorry from one destination to another.</p>
+    </footer>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

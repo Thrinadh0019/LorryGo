@@ -1,0 +1,24 @@
+{% extends "booking/admin/base_admin.html" %}
+{% block title %}Users - LorryGo Admin{% endblock %}
+{% block content %}
+<h1 style="margin-top:0;">Registered Users</h1>
+
+<div class="card">
+    {% if users %}
+    <table>
+        <thead><tr><th>Username</th><th>Email</th><th>Joined</th></tr></thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td>{{ u.username }}</td>
+                <td>{{ u.email|default:"—" }}</td>
+                <td>{{ u.created_at }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">No users registered yet.</div>
+    {% endif %}
+</div>
+{% endblock %}

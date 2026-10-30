@@ -1,0 +1,54 @@
+{% extends "booking/admin/base_admin.html" %}
+{% block title %}Manage Bookings - LorryGo Admin{% endblock %}
+{% block content %}
+<h1 style="margin-top:0;">Bookings</h1>
+
+<div class="card">
+    <form method="get" style="margin-bottom:16px;">
+        <label for="status" style="font-size:0.85rem;color:var(--slate);margin-right:8px;">Filter by status:</label>
+        <select name="status" id="status" onchange="this.form.submit()" style="padding:6px 10px;border-radius:6px;border:1px solid var(--border);">
+            <option value="" {% if not status_filter %}selected{% endif %}>All</option>
+            {% for key, label in statuses %}
+                <option value="{{ key }}" {% if status_filter == key %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </form>
+
+    {% if bookings %}
+    <table>
+        <thead>
+            <tr>
+                <th>Customer</th><th>Route</th><th>Lorry</th><th>Driver</th>
+                <th>Distance</th><th>Fare</th><th>Status</th><th>Update</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in bookings %}
+            <tr>
+                <td>{{ b.username }}</td>
+                <td>{{ b.source }} &rarr; {{ b.destination }}</td>
+                <td>{{ b.lorry_type_name }}</td>
+                <td>{{ b.driver_name|default:"—" }}</td>
+                <td>{{ b.distance_km }} km</td>
+                <td>₹{{ b.fare }}{% if b.is_return_discount %} <span style="color:#15803d;font-size:0.7rem;font-weight:700;background:#dcfce7;padding:1px 5px;border-radius:4px;">50% OFF (return trip)</span>{% endif %}</td>
+                <td><span class="badge {{ b.status }}">{{ b.status_label }}</span></td>
+                <td>
+                    <form method="post" action="{% url 'booking:admin_update_booking' b.id %}" class="status-pill-form" style="display:flex;gap:6px;">
+                        {% csrf_token %}
+                        <select name="status">
+                            {% for key, label in statuses %}
+                                <option value="{{ key }}" {% if b.status == key %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn-link" style="text-decoration:none;border:none;cursor:pointer;">Save</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">No bookings match this filter.</div>
+    {% endif %}
+</div>
+{% endblock %}

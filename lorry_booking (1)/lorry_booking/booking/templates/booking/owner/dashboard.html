@@ -1,0 +1,48 @@
+{% extends "booking/owner/base_owner.html" %}
+{% block title %}Owner Dashboard - LorryGo{% endblock %}
+{% block content %}
+<h1 style="margin-top:0;">Dashboard</h1>
+
+<div class="stat-grid">
+    <div class="stat-card" style="border-color:#d97706;"><div class="num">{{ stats.pending_requests }}</div><div class="label">Pending Ride Requests</div></div>
+    <div class="stat-card"><div class="num">{{ stats.total_vehicles }}</div><div class="label">Total Drivers</div></div>
+    <div class="stat-card"><div class="num">{{ stats.available_vehicles }}</div><div class="label">Available Now</div></div>
+    <div class="stat-card"><div class="num">{{ stats.active_trips }}</div><div class="label">Active Trips</div></div>
+    <div class="stat-card"><div class="num">{{ stats.completed_trips }}</div><div class="label">Completed Trips</div></div>
+    <div class="stat-card"><div class="num">₹{{ stats.earnings }}</div><div class="label">Total Earnings</div></div>
+</div>
+
+{% if stats.pending_requests %}
+<div class="card" style="background:#fffbeb;border-color:#fde68a;display:flex;justify-content:space-between;align-items:center;">
+    <p style="margin:0;color:#92400e;">{{ stats.pending_requests }} ride{{ stats.pending_requests|pluralize }} waiting to be accepted.</p>
+    <a href="{% url 'booking:owner_requests' %}" class="btn-primary" style="width:auto;padding:8px 18px;text-decoration:none;">View Requests</a>
+</div>
+{% endif %}
+
+<div class="card">
+    <h2 style="margin-top:0;">Active Trips</h2>
+    {% if active_trips %}
+    <table>
+        <thead><tr><th>Route</th><th>Driver</th><th>Vehicle</th><th>Fare</th><th>Status</th></tr></thead>
+        <tbody>
+            {% for t in active_trips %}
+            <tr>
+                <td>{{ t.source }} &rarr; {{ t.destination }}</td>
+                <td>{{ t.driver_name }}</td>
+                <td>{{ t.driver_vehicle_number }}</td>
+                <td>₹{{ t.fare }}</td>
+                <td><span class="badge {{ t.status }}">{{ t.status_label }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">No active trips right now.</div>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2 style="margin-top:0;">Quick Links</h2>
+    <p><a href="{% url 'booking:owner_drivers' %}">+ Add a new driver</a> &middot; <a href="{% url 'booking:owner_trips' %}">View all trip history</a></p>
+</div>
+{% endblock %}

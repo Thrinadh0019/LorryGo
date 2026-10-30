@@ -1,0 +1,47 @@
+{% extends "booking/driver/base_driver.html" %}
+{% block title %}Dashboard - Driver Panel{% endblock %}
+{% block content %}
+<h1 style="margin-top:0;">Hi, {{ driver.name }} 👋</h1>
+<p style="color:var(--slate);margin-top:-8px;">{{ driver.vehicle_number }} &middot; ⭐ {{ driver.rating }}</p>
+
+<div class="stat-grid">
+    <div class="stat-card"><div class="num">{{ completed_trips }}</div><div class="label">Completed Trips</div></div>
+    <div class="stat-card"><div class="num">₹{{ earnings }}</div><div class="label">Total Earnings</div></div>
+    <div class="stat-card">
+        <div class="num" style="font-size:1.1rem;">
+            <span class="badge {{ driver.status }}">{{ driver.status }}</span>
+        </div>
+        <div class="label">Your Status</div>
+    </div>
+</div>
+
+{% if driver.status != "on_trip" %}
+<div class="card">
+    <form method="post" action="{% url 'booking:driver_toggle_availability' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-primary" style="width:auto;padding:10px 22px;">
+            {% if driver.status == "available" %}Go Offline{% else %}Go Available{% endif %}
+        </button>
+    </form>
+</div>
+{% endif %}
+
+<div class="card">
+    <h2 style="margin-top:0;">Active Trip</h2>
+    {% if active_trip %}
+        <p style="font-size:1.05rem;font-weight:600;">{{ active_trip.source }} &rarr; {{ active_trip.destination }}</p>
+        <p style="color:var(--slate);">₹{{ active_trip.fare }} &middot; {{ active_trip.distance_km }} km &middot; <span class="badge {{ active_trip.status }}">{{ active_trip.status_label }}</span></p>
+        {% if active_trip.notes %}<p style="color:var(--slate);font-size:0.88rem;">Note: {{ active_trip.notes }}</p>{% endif %}
+        {% if next_status %}
+        <form method="post" action="{% url 'booking:driver_advance_trip' active_trip.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-primary" style="width:auto;padding:10px 22px;">
+                {% if active_trip.status == "driver_assigned" %}Start Trip{% else %}Mark Delivered{% endif %}
+            </button>
+        </form>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">No active trip right now. New bookings will appear here automatically once matched to you.</div>
+    {% endif %}
+</div>
+{% endblock %}

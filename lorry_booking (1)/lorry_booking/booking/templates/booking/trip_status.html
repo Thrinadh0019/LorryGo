@@ -1,0 +1,172 @@
+{% extends "booking/base.html" %}
+{% block title %}Trip Status - LorryGo{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<style>
+  #trip-map { height: 340px; width: 100%; border-radius: 10px; margin: 16px 0; }
+  .status-banner {
+    display: flex; align-items: center; gap: 12px; padding: 16px 20px;
+    border-radius: 10px; background: #fff7ed; border: 1px solid #fdba74; margin-bottom: 16px;
+  }
+  .status-banner .dot {
+    width: 12px; height: 12px; border-radius: 50%; background: var(--primary);
+    animation: pulse 1.4s infinite;
+  }
+  @keyframes pulse { 0% { opacity: 1; } 50% { opacity: .3; } 100% { opacity: 1; } }
+  .status-banner.completed { background: var(--success-bg); border-color: #86efac; }
+  .status-banner.cancelled { background: var(--error-bg); border-color: #fca5a5; }
+  .status-banner.completed .dot, .status-banner.cancelled .dot { animation: none; }
+  .status-banner.completed .dot { background: var(--success); }
+  .status-banner.cancelled .dot { background: var(--error); }
+  .driver-card {
+    display: flex; justify-content: space-between; align-items: center;
+    border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px;
+  }
+  .driver-card .avatar {
+    width: 44px; height: 44px; border-radius: 50%; background: var(--navy);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1.1rem; margin-right: 12px;
+  }
+  .driver-row { display: flex; align-items: center; }
+  .trip-meta { display: flex; gap: 28px; flex-wrap: wrap; margin: 14px 0; font-size: 0.9rem; }
+  .trip-meta strong { display: block; color: var(--navy); font-size: 1rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:720px;margin:0 auto;">
+    <h1 style="margin-top:0;">Trip Status</h1>
+
+    <div class="status-banner {{ b.status }}" id="status-banner">
+        <div class="dot"></div>
+        <div>
+            <strong id="status-label">{{ b.status_label }}</strong>
+            <div style="font-size:0.85rem;color:var(--slate);">Booking ID: {{ b.id }}</div>
+        </div>
+    </div>
+
+    <div id="driver-section">
+        {% if b.driver_name %}
+        <div class="driver-card" id="driver-card">
+            <div class="driver-row">
+                <div class="avatar">{{ b.driver_name|slice:":1" }}</div>
+                <div>
+                    <div style="font-weight:700;" id="driver-name">{{ b.driver_name }}</div>
+                    <div style="font-size:0.85rem;color:var(--slate);" id="driver-vehicle">{{ b.driver_vehicle_number }} &middot; {{ b.lorry_type_name }}</div>
+                </div>
+            </div>
+            <a href="tel:{{ b.driver_phone }}" class="btn-link" style="text-decoration:none;" id="driver-phone">📞 Call</a>
+        </div>
+        {% else %}
+        <div class="driver-card" id="driver-card" style="color:var(--slate);">
+            Waiting for an owner to accept your ride and assign a driver — this may take a few minutes.
+        </div>
+        {% endif %}
+    </div>
+
+    <div id="trip-map"></div>
+
+    <div class="trip-meta">
+        <div><span>From</span><strong>{{ b.source }}</strong></div>
+        <div><span>To</span><strong>{{ b.destination }}</strong></div>
+        <div><span>Distance</span><strong>{{ b.distance_km }} km</strong></div>
+        <div><span>Fare</span><strong>₹{{ b.fare }}{% if b.is_return_discount %} <span style="color:#15803d;font-size:0.75rem;font-weight:700;background:#dcfce7;padding:2px 6px;border-radius:4px;">50% OFF</span>{% endif %}</strong>
+            {% if b.is_return_discount %}<div style="font-size:0.78rem;color:var(--slate);text-decoration:line-through;">₹{{ b.original_fare }}</div>{% endif %}
+        </div>
+    </div>
+
+    {% if b.is_return_discount %}
+    <div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:0.85rem;color:#065f46;">
+        🎉 You got a return-trip discount — a nearby returning truck cut this fare in half.
+    </div>
+    {% endif %}
+
+    {% if b.status == "requested" or b.status == "driver_assigned" %}
+    <form method="post" action="{% url 'booking:cancel_booking' b.id %}" onsubmit="return confirm('Cancel this trip?');">
+        {% csrf_token %}
+        <button type="submit" class="btn-primary" style="background:var(--error);">Cancel Trip</button>
+    </form>
+    {% endif %}
+
+    <p style="margin-top:16px;"><a href="{% url 'booking:my_bookings' %}">&larr; Back to my bookings</a></p>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function () {
+    const pickup = [{{ b.pickup_lat }}, {{ b.pickup_lng }}];
+    const drop = [{{ b.drop_lat }}, {{ b.drop_lng }}];
+    const map = L.map('trip-map');
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const greenIcon = L.divIcon({ className: '', html: '<div style="background:#15803d;width:16px;height:16px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 4px rgba(0,0,0,.4);"></div>' });
+    const redIcon = L.divIcon({ className: '', html: '<div style="background:#b91c1c;width:16px;height:16px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 4px rgba(0,0,0,.4);"></div>' });
+    const truckIcon = L.divIcon({ className: '', html: '<div style="font-size:22px;">🚚</div>', iconSize: [24,24] });
+
+    L.marker(pickup, { icon: greenIcon }).addTo(map).bindPopup('Pickup: {{ b.source|escapejs }}');
+    L.marker(drop, { icon: redIcon }).addTo(map).bindPopup('Drop: {{ b.destination|escapejs }}');
+
+    const bounds = L.latLngBounds([pickup, drop]);
+
+    {% if b.driver_start_lat %}
+    const driverStart = [{{ b.driver_start_lat }}, {{ b.driver_start_lng }}];
+    L.marker(driverStart, { icon: truckIcon }).addTo(map).bindPopup('{{ b.driver_name|default:"Driver"|escapejs }}');
+    bounds.extend(driverStart);
+    {% endif %}
+
+    map.fitBounds(bounds, { padding: [40, 40] });
+
+    // Draw the route line via OSRM for a realistic path; fall back to a straight line.
+    (async function drawRoute() {
+        try {
+            const url = `https://router.project-osrm.org/route/v1/driving/${pickup[1]},${pickup[0]};${drop[1]},${drop[0]}?overview=full&geometries=geojson`;
+            const res = await fetch(url);
+            const data = await res.json();
+            if (data.routes && data.routes.length) {
+                const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+                L.polyline(coords, { color: '#d97706', weight: 5, opacity: 0.85 }).addTo(map);
+                return;
+            }
+        } catch (err) { /* fall through to straight line */ }
+        L.polyline([pickup, drop], { color: '#d97706', weight: 4, dashArray: '6 6' }).addTo(map);
+    })();
+
+    // Poll for status changes (e.g. admin marking the trip in-transit / completed).
+    const statusUrl = "{% url 'booking:booking_status_api' b.id %}";
+    const terminal = ['completed', 'cancelled'];
+    async function poll() {
+        if (terminal.includes(document.getElementById('status-banner').dataset.status)) return;
+        try {
+            const res = await fetch(statusUrl);
+            const data = await res.json();
+            if (data.error) return;
+            document.getElementById('status-label').textContent = data.status_label;
+            const banner = document.getElementById('status-banner');
+            banner.className = 'status-banner ' + data.status;
+            banner.dataset.status = data.status;
+
+            if (data.driver_name) {
+                document.getElementById('driver-section').innerHTML = `
+                  <div class="driver-card" id="driver-card">
+                    <div class="driver-row">
+                      <div class="avatar">${data.driver_name.charAt(0)}</div>
+                      <div>
+                        <div style="font-weight:700;">${data.driver_name}</div>
+                        <div style="font-size:0.85rem;color:var(--slate);">${data.driver_vehicle_number || ''}</div>
+                      </div>
+                    </div>
+                    <a href="tel:${data.driver_phone}" class="btn-link" style="text-decoration:none;">📞 Call</a>
+                  </div>`;
+            }
+        } catch (err) { /* ignore transient network errors */ }
+    }
+    document.getElementById('status-banner').dataset.status = "{{ b.status }}";
+    setInterval(poll, 4000);
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "booking/owner/base_owner.html" %}
+{% block title %}My Drivers - LorryGo{% endblock %}
+{% block content %}
+<h1 style="margin-top:0;">My Drivers</h1>
+
+<div class="card">
+    <h2 style="margin-top:0;">Add a Driver</h2>
+    <p style="color:var(--slate);margin-top:-8px;font-size:0.88rem;">
+        Add the driver's details and set their login credentials here — you'll
+        get a one-time confirmation with the password to pass along to them.
+        They log in separately at <code>/driver/login/</code>.
+    </p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-row">
+            <div class="form-group">
+                <label for="name">Driver Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Driver Phone</label>
+                <input type="tel" id="phone" name="phone" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="vehicle_number">Vehicle Number</label>
+            <input type="text" id="vehicle_number" name="vehicle_number" placeholder="e.g. MH-31-AB-1234" required>
+        </div>
+        <hr style="border:none;border-top:1px solid var(--border);margin:18px 0;">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="driver_username">Driver Login Username</label>
+                <input type="text" id="driver_username" name="driver_username" autocomplete="off" required>
+            </div>
+            <div class="form-group">
+                <label for="driver_password">Driver Login Password</label>
+                <input type="password" id="driver_password" name="driver_password" minlength="6" autocomplete="new-password" required>
+            </div>
+        </div>
+        <button type="submit" class="btn-primary" style="width:auto;padding:10px 22px;">Add Driver</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2 style="margin-top:0;">All Drivers</h2>
+    {% if drivers %}
+    <table>
+        <thead>
+            <tr><th>Name</th><th>Phone</th><th>Vehicle</th><th>Login</th><th>Rating</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for d in drivers %}
+            <tr>
+                <td>{{ d.name }}</td>
+                <td>{{ d.phone }}</td>
+                <td>{{ d.vehicle_number }}</td>
+                <td><code>{{ d.username }}</code></td>
+                <td>⭐ {{ d.rating }}</td>
+                <td><span class="badge {{ d.status }}">{{ d.status }}</span></td>
+                <td style="white-space:nowrap;">
+                    <form method="post" action="{% url 'booking:owner_toggle_driver' d.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-link" style="text-decoration:none;border:none;cursor:pointer;">Toggle</button>
+                    </form>
+                    &middot;
+                    <form method="post" action="{% url 'booking:owner_remove_driver' d.id %}" style="display:inline;" onsubmit="return confirm('Remove this driver?');">
+                        {% csrf_token %}
+                        <button type="submit" class="cancel-btn" style="background:none;border:none;cursor:pointer;">Remove</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">No drivers yet — add your first one above.</div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "booking/base.html" %}
+{% block title %}Register as Owner - LorryGo{% endblock %}
+{% block content %}
+<div class="auth-card">
+    <h1>Register Your Fleet</h1>
+    <p class="subtitle">List your lorries on LorryGo and start earning</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required autofocus>
+        </div>
+        <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required minlength="6">
+        </div>
+        <div class="form-group">
+            <label for="confirm_password">Confirm Password</label>
+            <input type="password" id="confirm_password" name="confirm_password" required minlength="6">
+        </div>
+        <button type="submit" class="btn-primary">Create Owner Account</button>
+    </form>
+    <p class="auth-switch">Already registered? <a href="{% url 'booking:owner_login' %}">Login here</a></p>
+    <p class="auth-switch"><a href="{% url 'booking:login' %}">&larr; Back to customer login</a></p>
+</div>
+{% endblock %}

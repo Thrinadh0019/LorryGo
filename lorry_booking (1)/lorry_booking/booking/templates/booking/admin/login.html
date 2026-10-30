@@ -1,0 +1,21 @@
+{% extends "booking/base.html" %}
+{% block title %}Admin Login - LorryGo{% endblock %}
+{% block content %}
+<div class="auth-card">
+    <h1>Admin Panel</h1>
+    <p class="subtitle">Sign in to manage bookings, drivers &amp; users</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="username">Admin Username</label>
+            <input type="text" id="username" name="username" required autofocus>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn-primary">Login</button>
+    </form>
+    <p class="auth-switch"><a href="{% url 'booking:login' %}">&larr; Back to customer login</a></p>
+</div>
+{% endblock %}

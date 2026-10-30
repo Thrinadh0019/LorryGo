@@ -1,0 +1,39 @@
+{% extends "booking/admin/base_admin.html" %}
+{% block title %}Admin Dashboard - LorryGo{% endblock %}
+{% block content %}
+<h1 style="margin-top:0;">Dashboard</h1>
+
+<div class="stat-grid">
+    <div class="stat-card"><div class="num">{{ stats.total_users }}</div><div class="label">Registered Users</div></div>
+    <div class="stat-card"><div class="num">{{ stats.total_drivers }}</div><div class="label">Total Drivers</div></div>
+    <div class="stat-card"><div class="num">{{ stats.available_drivers }}</div><div class="label">Available Drivers</div></div>
+    <div class="stat-card"><div class="num">{{ stats.total_bookings }}</div><div class="label">Total Bookings</div></div>
+    <div class="stat-card"><div class="num">{{ stats.active_trips }}</div><div class="label">Active Trips</div></div>
+    <div class="stat-card"><div class="num">{{ stats.completed_trips }}</div><div class="label">Completed Trips</div></div>
+</div>
+
+<div class="card">
+    <h2 style="margin-top:0;">Recent Bookings</h2>
+    {% if recent_bookings %}
+    <table>
+        <thead>
+            <tr><th>Customer</th><th>Route</th><th>Lorry</th><th>Fare</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+            {% for b in recent_bookings %}
+            <tr>
+                <td>{{ b.username }}</td>
+                <td>{{ b.source }} &rarr; {{ b.destination }}</td>
+                <td>{{ b.lorry_type_name }}</td>
+                <td>₹{{ b.fare }}{% if b.is_return_discount %} <span style="color:#15803d;font-size:0.68rem;font-weight:700;">50% OFF</span>{% endif %}</td>
+                <td><span class="badge {{ b.status }}">{{ b.status_label }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p style="margin-top:14px;"><a href="{% url 'booking:admin_bookings' %}">Manage all bookings &rarr;</a></p>
+    {% else %}
+    <div class="empty-state">No bookings yet.</div>
+    {% endif %}
+</div>
+{% endblock %}

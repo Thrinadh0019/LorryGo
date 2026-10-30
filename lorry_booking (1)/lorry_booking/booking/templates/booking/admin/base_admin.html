@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin - LorryGo{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'booking/css/style.css' %}">
+    <style>
+        body.admin-body { flex-direction: row; }
+        .admin-sidebar {
+            width: 220px; background: var(--navy); color: #fff; min-height: 100vh;
+            padding: 24px 0; flex-shrink: 0;
+        }
+        .admin-sidebar .brand { padding: 0 24px 24px; font-weight: 700; font-size: 1.15rem; display: block; color: #fff; text-decoration: none; }
+        .admin-sidebar a { display: block; padding: 12px 24px; color: #cbd5e1; text-decoration: none; font-size: 0.92rem; }
+        .admin-sidebar a:hover, .admin-sidebar a.active { background: #1e293b; color: #fff; }
+        .admin-sidebar .logout-link { margin-top: 24px; border-top: 1px solid #1e293b; padding-top: 16px; color: #fca5a5; }
+        .admin-main { flex: 1; padding: 32px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+        .stat-card .num { font-size: 1.8rem; font-weight: 700; color: var(--navy); }
+        .stat-card .label { font-size: 0.82rem; color: var(--slate); margin-top: 2px; }
+        .status-pill-form select { padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.85rem; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="admin-body">
+    <aside class="admin-sidebar">
+        <a class="brand" href="{% url 'booking:admin_dashboard' %}">🚛 LorryGo Admin</a>
+        <a href="{% url 'booking:admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">Dashboard</a>
+        <a href="{% url 'booking:admin_bookings' %}" class="{% if request.resolver_match.url_name == 'admin_bookings' %}active{% endif %}">Bookings</a>
+        <a href="{% url 'booking:admin_drivers' %}" class="{% if request.resolver_match.url_name == 'admin_drivers' %}active{% endif %}">Drivers</a>
+        <a href="{% url 'booking:admin_users' %}" class="{% if request.resolver_match.url_name == 'admin_users' %}active{% endif %}">Users</a>
+        <a href="{% url 'booking:admin_logout' %}" class="logout-link">Logout</a>
+    </aside>
+    <main class="admin-main">
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

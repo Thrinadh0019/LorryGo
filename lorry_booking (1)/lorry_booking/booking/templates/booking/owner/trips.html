@@ -1,0 +1,36 @@
+{% extends "booking/owner/base_owner.html" %}
+{% block title %}Trip Requests - LorryGo{% endblock %}
+{% block content %}
+<h1 style="margin-top:0;">Trip Requests</h1>
+
+<div class="card">
+    {% if trips %}
+    <table>
+        <thead><tr><th>Route</th><th>Driver</th><th>Vehicle</th><th>Fare</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+            {% for t in trips %}
+            <tr>
+                <td>{{ t.source }} &rarr; {{ t.destination }}</td>
+                <td>{{ t.driver_name }}</td>
+                <td>{{ t.driver_vehicle_number }}</td>
+                <td>₹{{ t.fare }}{% if t.is_return_discount %} <span style="color:#15803d;font-size:0.7rem;font-weight:700;background:#dcfce7;padding:1px 5px;border-radius:4px;">50% OFF</span>{% endif %}</td>
+                <td><span class="badge {{ t.status }}">{{ t.status_label }}</span></td>
+                <td>
+                    {% if t.status in transitions %}
+                    <form method="post" action="{% url 'booking:owner_advance_trip' t.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-link" style="text-decoration:none;border:none;cursor:pointer;font-size:0.82rem;">
+                            {% if t.status == "driver_assigned" %}Start Trip{% else %}Mark Delivered{% endif %}
+                        </button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">No trips yet — once a customer books one of your drivers, it'll show up here.</div>
+    {% endif %}
+</div>
+{% endblock %}

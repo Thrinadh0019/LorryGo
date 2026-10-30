@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Owner Panel - LorryGo{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'booking/css/style.css' %}">
+    <style>
+        body.owner-body { flex-direction: row; }
+        .owner-sidebar {
+            width: 220px; background: #0c4a6e; color: #fff; min-height: 100vh;
+            padding: 24px 0; flex-shrink: 0;
+        }
+        .owner-sidebar .brand { padding: 0 24px 24px; font-weight: 700; font-size: 1.15rem; display: block; color: #fff; text-decoration: none; }
+        .owner-sidebar a { display: block; padding: 12px 24px; color: #bae6fd; text-decoration: none; font-size: 0.92rem; }
+        .owner-sidebar a:hover, .owner-sidebar a.active { background: #075985; color: #fff; }
+        .owner-sidebar .logout-link { margin-top: 24px; border-top: 1px solid #075985; padding-top: 16px; color: #fca5a5; }
+        .owner-main { flex: 1; padding: 32px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+        .stat-card .num { font-size: 1.8rem; font-weight: 700; color: var(--navy); }
+        .stat-card .label { font-size: 0.82rem; color: var(--slate); margin-top: 2px; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="owner-body">
+    <aside class="owner-sidebar">
+        <a class="brand" href="{% url 'booking:owner_dashboard' %}">🚛 LorryGo Owner</a>
+        <a href="{% url 'booking:owner_dashboard' %}" class="{% if request.resolver_match.url_name == 'owner_dashboard' %}active{% endif %}">Dashboard</a>
+        <a href="{% url 'booking:owner_requests' %}" class="{% if request.resolver_match.url_name == 'owner_requests' %}active{% endif %}">Ride Requests</a>
+        <a href="{% url 'booking:owner_drivers' %}" class="{% if request.resolver_match.url_name == 'owner_drivers' %}active{% endif %}">My Drivers</a>
+        <a href="{% url 'booking:owner_trips' %}" class="{% if request.resolver_match.url_name == 'owner_trips' %}active{% endif %}">Trip Requests</a>
+        <a href="{% url 'booking:owner_logout' %}" class="logout-link">Logout</a>
+    </aside>
+    <main class="owner-main">
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
